@@ -74,6 +74,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void createRecyclerView() {
 
+        SharedPreferences mileagePreferences = getSharedPreferences("mileage", 0);
+        float avgMileage = mileagePreferences.getFloat("mileage", 0);
+
+        tvAvgMileage = findViewById(R.id.tv_avg_mileage);
+
+        tvAvgMileage.setText("Avg Mileage: " + avgMileage + " kmpl");
+
         mileageDatabaseAdapter.Open();
 
         Cursor cursor = mileageDatabaseAdapter.getQueryResult("SELECT * FROM MILEAGE");
@@ -83,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < cursor.getCount(); i++) {
             MileageModel mileageModel = new MileageModel(cursor.getFloat(4), cursor.getFloat(2), cursor.getFloat(3), cursor.getString(1));
             mileageList.add(mileageModel);
+            cursor.moveToNext();
         }
+
+        mileageDatabaseAdapter.Close();
 
         //Set layout manager for RecyclerView
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());

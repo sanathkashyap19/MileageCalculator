@@ -37,13 +37,13 @@ public class AddFuelActivity extends AppCompatActivity {
                 float fuelFilled = Float.parseFloat(etFuelFilled.getText().toString());
                 float distanceTravelled = Float.parseFloat(etDistanceTravelled.getText().toString());
 
-                Toast.makeText(getApplicationContext(), ""+ fuelFilled + " " + distanceTravelled, Toast.LENGTH_SHORT).show();
-
                 calcMileage(fuelFilled, distanceTravelled);
 
                 mileageDatabaseAdapter.Open();
 
-                mileageDatabaseAdapter.InsertMileage(new Date().toString(), fuelFilled, distanceTravelled, (fuelFilled/distanceTravelled));
+                mileageDatabaseAdapter.InsertMileage(new Date().toString(), fuelFilled, distanceTravelled, (distanceTravelled/fuelFilled));
+
+                mileageDatabaseAdapter.Close();
 
                 finish();
             }
@@ -62,7 +62,7 @@ public class AddFuelActivity extends AppCompatActivity {
         float avgMileage = mileagePreferences.getFloat("mileage", 0);
 
         //newAvg = avg + ((newNumber-avg)/(n+1))
-        float newAvgMileage = avgMileage + (((fuelFilled/distanceTravelled) - avgMileage) * (refills+1));
+        float newAvgMileage = ((refills * avgMileage) + (distanceTravelled/fuelFilled)) / (refills + 1);
 
         SharedPreferences.Editor mileagePreferencesEditor = mileagePreferences.edit();
         mileagePreferencesEditor.putFloat("mileage", newAvgMileage).apply();
