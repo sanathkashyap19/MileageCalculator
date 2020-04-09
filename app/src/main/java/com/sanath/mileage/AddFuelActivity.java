@@ -37,10 +37,12 @@ public class AddFuelActivity extends AppCompatActivity {
                 float fuelFilled = Float.parseFloat(etFuelFilled.getText().toString());
                 float distanceTravelled = Float.parseFloat(etDistanceTravelled.getText().toString());
 
+                //Calculate new average mileage
                 calcMileage(fuelFilled, distanceTravelled);
 
                 mileageDatabaseAdapter.Open();
 
+                //Store new records to database
                 mileageDatabaseAdapter.InsertMileage(new Date().toString(), fuelFilled, distanceTravelled, (distanceTravelled/fuelFilled));
 
                 mileageDatabaseAdapter.Close();
@@ -54,16 +56,19 @@ public class AddFuelActivity extends AppCompatActivity {
 
         mileageDatabaseAdapter.Open();
 
+        //Get total number of times fuel filled
         long refills = mileageDatabaseAdapter.getCountOfEntries("MILEAGE");
 
         mileageDatabaseAdapter.Close();
 
+        //Get current average mileage
         SharedPreferences mileagePreferences = getSharedPreferences("mileage", 0);
         float avgMileage = mileagePreferences.getFloat("mileage", 0);
 
-        //newAvg = avg + ((newNumber-avg)/(n+1))
+        //newAvg = ((n * avg) + (x)) / (n+1)
         float newAvgMileage = ((refills * avgMileage) + (distanceTravelled/fuelFilled)) / (refills + 1);
 
+        //Commit new average mileage
         SharedPreferences.Editor mileagePreferencesEditor = mileagePreferences.edit();
         mileagePreferencesEditor.putFloat("mileage", newAvgMileage).apply();
     }

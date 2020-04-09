@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Create SharedPreferences to store the average mileage
         SharedPreferences mileagePreferences = getSharedPreferences("mileage", 0);
         float avgMileage = mileagePreferences.getFloat("mileage", 0);
 
@@ -69,20 +70,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        //Create RecyclerView after going to AddFuelActivity and returning
         createRecyclerView();
     }
 
     private void createRecyclerView() {
 
+        //Get average mileage
         SharedPreferences mileagePreferences = getSharedPreferences("mileage", 0);
         float avgMileage = mileagePreferences.getFloat("mileage", 0);
 
         tvAvgMileage = findViewById(R.id.tv_avg_mileage);
 
+        //Set average mileage text
         tvAvgMileage.setText("Avg Mileage: " + avgMileage + " kmpl");
 
         mileageDatabaseAdapter.Open();
 
+        //Fetch records stored in database
         Cursor cursor = mileageDatabaseAdapter.getQueryResult("SELECT * FROM MILEAGE");
         cursor.moveToFirst();
         mileageList.clear();
