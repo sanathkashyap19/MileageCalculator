@@ -14,7 +14,7 @@
         app:cardCornerRadius="5dp">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/tv_avg_mileage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"

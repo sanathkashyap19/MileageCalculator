@@ -3,6 +3,7 @@ package com.sanath.mileage.adapter;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -34,6 +35,7 @@ public class MileageDatabaseAdapter {
         }
 
         @Override
+        //Create table
         public void onCreate(SQLiteDatabase db)
         {
 
@@ -102,5 +104,11 @@ public class MileageDatabaseAdapter {
     public Cursor getQueryResult(String query) throws SQLException
     {
         return db.rawQuery(query, null);
+    }
+
+    //Returns number of rows in table
+    public long getCountOfEntries(String tableName) {
+        long count = DatabaseUtils.queryNumEntries(db, tableName);
+        return count;
     }
 }

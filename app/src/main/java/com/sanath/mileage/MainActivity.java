@@ -5,11 +5,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sanath.mileage.adapter.MileageCardAdapter;
+import com.sanath.mileage.adapter.MileageDatabaseAdapter;
 import com.sanath.mileage.model.MileageModel;
 
 import java.lang.reflect.Array;
@@ -22,11 +26,23 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView rvMileageList;
     RecyclerView.Adapter adapterMileageList;
     FloatingActionButton fabAddFuel;
+    TextView tvAvgMileage;
+    MileageDatabaseAdapter mileageDatabaseAdapter;
+
+    //Array containing the data models to be displayed in the cards. Model is present in MileageModel.java
+    List<MileageModel> mileageList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences mileagePreferences = getSharedPreferences("mileage", 0);
+        float avgMileage = mileagePreferences.getFloat("mileage", 0);
+
+        tvAvgMileage = findViewById(R.id.tv_avg_mileage);
+
+        tvAvgMileage.setText("Avg Mileage: " + avgMileage + " kmpl");
 
         //Initialize RecyclerView containing the CardView which displays mileage
         rvMileageList = findViewById(R.id.mileage_list);
@@ -34,28 +50,10 @@ public class MainActivity extends AppCompatActivity {
         //Initialize FloatingActionButton which will take user to AddFuelActivity
         fabAddFuel = findViewById(R.id.fab_add_fuel);
 
+        mileageDatabaseAdapter = new MileageDatabaseAdapter(this);
+
         // use this setting to improve performance if you know that changes in content do not change the layout size of the RecyclerView
         rvMileageList.setHasFixedSize(true);
-
-        //Array containing the data models to be displayed in the cards. Model is present in MileageModel.java
-        List<MileageModel> mileageList = new ArrayList<>();
-        MileageModel mileageModel = new MileageModel(15, 12, 200, "00/00/0000");
-        mileageList.add(mileageModel);
-        mileageList.add(mileageModel);
-        mileageList.add(mileageModel);
-        mileageList.add(mileageModel);
-        mileageList.add(mileageModel);
-        mileageList.add(mileageModel);
-
-        mileageModel = new MileageModel(20, 12, 200, "00/00/0000");
-        mileageList.add(mileageModel);
-
-        //Set layout manager for RecyclerView
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        rvMileageList.setLayoutManager(mLayoutManager);
-        //Set adapter for RecyclerView
-        adapterMileageList = new MileageCardAdapter(this, mileageList);
-        rvMileageList.setAdapter(adapterMileageList);
 
         //On click function for FloatingActionButton
         fabAddFuel.setOnClickListener(new View.OnClickListener() {
@@ -65,5 +63,33 @@ public class MainActivity extends AppCompatActivity {
                 startActivity( new Intent(getApplicationContext(), AddFuelActivity.class));
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        createRecyclerView();
+    }
+
+    private void createRecyclerView() {
+
+        mileageDatabaseAdapter.Open();
+
+        Cursor cursor = mileageDatabaseAdapter.getQueryResult("SELECT * FROM MILEAGE");
+        cursor.moveToFirst();
+        mileageList.clear();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+            MileageModel mileageModel = new MileageModel(cursor.getFloat(4), cursor.getFloat(2), cursor.getFloat(3), cursor.getString(1));
+            mileageList.add(mileageModel);
+        }
+
+        //Set layout manager for RecyclerView
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        rvMileageList.setLayoutManager(mLayoutManager);
+        //Set adapter for RecyclerView
+        adapterMileageList = new MileageCardAdapter(this, mileageList);
+        rvMileageList.setAdapter(adapterMileageList);
     }
 }
